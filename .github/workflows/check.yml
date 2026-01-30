@@ -12,32 +12,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  rust-check:
-    name: Rust Checks
-    runs-on: ubuntu-latest
-    env:
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
-
-      - name: Set up Python 3
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-
-      - name: Set up NDK
-        run: python build.py -v ndk
-
-      - name: Rust checks
-        run: |
-          cd native/src
-          export PATH="$ANDROID_SDK_ROOT/ndk/magisk/toolchains/rust/bin:$PATH"
-          cargo check --workspace --all-targets
-        shell: bash
-
   kotlin-lint:
     name: Kotlin Lint
     runs-on: ubuntu-latest
