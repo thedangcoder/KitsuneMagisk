@@ -1,0 +1,54 @@
+name: Quick Build
+
+on:
+  push:
+    branches:
+      - kitsune
+      - dev
+  pull_request:
+    branches:
+      - kitsune
+      - dev
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Magisk
+    runs-on: ubuntu-latest
+    env:
+      SCCACHE_DIRECT: false
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+          fetch-depth: 0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+
+      - name: Build release
+        run: ./build.py -vr all
+
+      - name: Build debug
+        run: ./build.py -v all
+
+      - name: Stop gradle daemon
+        run: ./gradlew --stop
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: magisk-${{ github.sha }}
+          path: out
+          compression-level: 9
+
+      - name: Upload debug symbols
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: symbols-${{ github.sha }}
+          path: |
+            app/build/outputs
+            native/out
+          compression-level: 9
